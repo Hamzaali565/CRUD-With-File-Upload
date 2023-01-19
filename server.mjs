@@ -150,9 +150,9 @@ app.put('/user/:id', async (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
-// const __dirname = path.resolve();
-// app.use('/', express.static(path.join(__dirname, './Frontend/build')))
-// app.use('*', express.static(path.join(__dirname, './Frontend/build')))
+const __dirname = path.resolve();
+app.use('/', express.static(path.join(__dirname, './Frontend/build')))
+app.use('*', express.static(path.join(__dirname, './Frontend/build')))
 
 const mongodbURI = process.env.mongodbURI ||
     "mongodb+srv://CRUD:hamzaali565@cluster0.kh990zg.mongodb.net/postings?retryWrites=true&w=majority";
