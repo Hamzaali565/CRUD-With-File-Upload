@@ -192,34 +192,54 @@ app.delete('/user/:id', async (req, res) => {
 //     }
 // })
 
-app.put('/user/:id', async (req, res) => {
+app.put('/user/:id', uploadmiddleware.any(), async (req, res) => {
     const body = req.body;
     const id = req.params.id;
     try {
         if (!body.email) throw new Error('Email Is required')
         if (!body.password) throw new Error('Password is required')
         if (body.password.length < 8) throw new Error('Password Should be greater than 8 Characters')
-        // if (
-        //     !body.email ||
-        //     !body.password 
+        bucket.upload(
+            req.files[0].path, {
+            destination: `image/${req.files[0].filename}`,
+        },
+            function (err, file, apiResponse) {
+                if (!err) {
+                    file.getSignedUrl({
+                        action: 'read',
+                        expires: '03-09-2491'
+                    }).then((urlData, err) => {
+                        if (!err) {
+                            // console.log("public downloadable url: ", urlData[0])
+                            
+                            try {
+                                fs.unlinkSync(req.files[0].path)
+                                //file removed
+                            } catch (err) {
+                                console.error(err)
+                            }
+                            userModels.findByIdAndUpdate(id,
+                                {
+                                    email: body.email,
+                                    password: body.password,
+                                    imageUrl: urlData[0]
+                                },
+                                { new: true }
+                            ).exec();
+                            // console.log('updated: ', data);
+                            res.send({
+                                message: "user modified successfully",
+                                
+                            });
+                        }
+                    })
+                } else {
+                    console.log("err: ", err)
+                    res.status(500).send("server Error");
+                }
+            });
 
-        // ) {
-        //     res.status(400).send({message:"required parameters are missing"})
-        //     return;
-        // }
-
-        let data = await userModels.findByIdAndUpdate(id,
-            {
-                email: body.email,
-                password: body.password,
-            },
-            { new: true }
-        ).exec();
-        // console.log('updated: ', data);
-        res.send({
-            message: "user modified successfully",
-            data: data
-        });
+       
     }
     catch (error) {
         res.status(500).send({
