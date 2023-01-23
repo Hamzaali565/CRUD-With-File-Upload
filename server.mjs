@@ -50,7 +50,8 @@ app.use(cors({
 let NewUserSchema = new mongoose.Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
-    imageUrl: {type: String}
+    imageUrl: {type: String},
+    returnData: {type: String}
 })
 const userModels = mongoose.model('user', NewUserSchema)
 // createData
@@ -83,7 +84,6 @@ app.post('/send-credentails', uploadmiddleware.any(), async (req, res) => {
                     }).then((urlData, err) => {
                         if (!err) {
                             // console.log("public downloadable url: ", urlData[0])
-                            
                             try {
                                 fs.unlinkSync(req.files[0].path)
                                 //file removed
@@ -100,7 +100,8 @@ app.post('/send-credentails', uploadmiddleware.any(), async (req, res) => {
                                         userModels.create({
                                             email: body.email,
                                             password: body.password,
-                                            imageUrl: urlData[0]
+                                            imageUrl: urlData[0],
+                                            returnData: body.imageUrl
                                         },
                                             (err, saved) => {
                                                 if (!err) {
@@ -131,6 +132,46 @@ app.post('/send-credentails', uploadmiddleware.any(), async (req, res) => {
         })
     }
 })
+// app.post('/send-credentials', async(req, res)=>{
+//     try{
+
+//         const body = req.body;
+//         if (!body.email) throw new Error('Email Is required')
+//         if (!body.password) throw new Error('Password is required')
+//         if (body.password.length < 8) throw new Error('Password Should be greater than 8 Characters')
+//         userModels.findOne({ email: body.email }, (err, user) => {
+//             if (!err) {
+//                 if (user) {
+//                     res.status(404).send({
+//                         message: "user Already Exist"
+//                     })
+//                 } else {
+//                     userModels.create({
+//                         email: body.email,
+//                         password: body.password,
+//                         // imageUrl: urlData[0]
+//                     },
+//                         (err, saved) => {
+//                             if (!err) {
+//                                 res.send({
+//                                     message: "Your Data is Submitted",
+//                                     // data: saved
+//                                 })
+//                             } else throw new Error('Server Error')
+//                         })
+//                 }
+
+
+
+//             }
+//         })
+//     }catch(error){
+//         res.status(404).send({
+//             message: `${error}`
+//         })
+//     }
+// })
+
 // all users
 app.get('/users', async (req, res) => {
     try {
@@ -218,6 +259,8 @@ app.put('/user/:id', uploadmiddleware.any(), async (req, res) => {
                             } catch (err) {
                                 console.error(err)
                             }
+
+                            
                             userModels.findByIdAndUpdate(id,
                                 {
                                     email: body.email,
