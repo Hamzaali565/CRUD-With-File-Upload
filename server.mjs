@@ -36,6 +36,7 @@ const storageConfig = multer.diskStorage({ // https://www.npmjs.com/package/mult
         cb(null, `${new Date().getTime()}-${file.originalname}`)
     }
 })
+
 let uploadmiddleware = multer({ storage: storageConfig })
 const app = express()
 const port = process.env.PORT || 5001;
@@ -66,6 +67,7 @@ app.post('/send-credentails', uploadmiddleware.any(), async (req, res) => {
         req.body.email = req.body.email.toLowerCase()
         console.log("req.body: ", req.body);
         console.log("req.files: ", req.files);
+        console.log('req.files[0]', req.files[0] );
 
         console.log("uploaded file name: ", req.files[0].originalname);
         console.log("file type: ", req.files[0].mimetype);
@@ -259,7 +261,6 @@ app.put('/user/:id', uploadmiddleware.any(), async (req, res) => {
                             } catch (err) {
                                 console.error(err)
                             }
-
                             
                             userModels.findByIdAndUpdate(id,
                                 {
